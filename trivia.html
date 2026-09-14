@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Court of Velvet Noir</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@400;600;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #050505;
+            background-image: 
+                linear-gradient(45deg, #110011 25%, transparent 25%, transparent 75%, #110011 75%, #110011),
+                linear-gradient(45deg, #110011 25%, transparent 25%, transparent 75%, #110011 75%, #110011);
+            background-size: 40px 40px;
+            background-position: 0 0, 20px 20px;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        .font-dramatic {
+            font-family: 'Bebas Neue', cursive;
+        }
+
+        /* Neon Glows */
+        .neon-magenta {
+            box-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff, inset 0 0 15px #ff00ff;
+            border-color: #ff00ff;
+        }
+        
+        .neon-cyan {
+            box-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, inset 0 0 10px #00ffff;
+            border-color: #00ffff;
+        }
+        
+        .neon-yellow {
+            text-shadow: 0 0 10px #ffff00, 0 0 20px #ffff00;
+            color: #ffff00;
+        }
+
+        /* Chaotic Button Hover Effects */
+        .btn-chaos {
+            transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            border: 3px solid transparent;
+        }
+
+        .btn-chaos:hover {
+            /* Use a small randomized tilt via CSS variable if needed; remove invalid JS from CSS */
+            transform: scale(1.05) rotate(-2deg);
+            border-color: #00ffff;
+            background: rgba(0, 255, 255, 0.1);
+            box-shadow: 0 0 15px #00ffff;
+        }
+        
+        .btn-chaos:nth-child(even):hover {
+            transform: scale(1.05) rotate(2deg);
+            border-color: #ff00ff;
+            background: rgba(255, 0, 255, 0.1);
+            box-shadow: 0 0 15px #ff00ff;
+        }
+
+        /* Full Screen Flashes */
+        .flash-overlay {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.1s;
+        }
+
+        .flash-active {
+            opacity: 1;
+        }
+
+        .flash-objection {
+            background: rgba(255, 0, 0, 0.4);
+        }
+
+        .flash-sustained {
+            background: rgba(0, 255, 0, 0.4);
+        }
+
+        /* Jagged / Dramatic Text Animations */
+        .text-jagged {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 10rem;
+            transform: rotate(-10deg) scale(1.5);
+            text-shadow: 5px 5px 0 #000, -2px -2px 0 #fff;
+            letter-spacing: 0.1em;
+        }
+
+        @keyframes shake-violent {
+            0%, 100% { transform: rotate(-10deg) scale(1.5) translate(0, 0); }
+            25% { transform: rotate(-12deg) scale(1.5) translate(-10px, 10px); }
+            50% { transform: rotate(-8deg) scale(1.6) translate(10px, -10px); }
+            75% { transform: rotate(-11deg) scale(1.5) translate(-10px, -5px); }
+        }
+
+        .flash-active .text-objection {
+            color: #ff0000;
+            animation: shake-violent 0.2s infinite;
+        }
+
+        .flash-active .text-sustained {
+            color: #00ff00;
+            transform: scale(1);
+            text-shadow: 0 0 30px #00ff00, 3px 3px 0 #000;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* Final Button Animation */
+        @keyframes pulse-neon {
+            0% { box-shadow: 0 0 10px #ffff00, 0 0 20px #ffff00; transform: scale(1); }
+            50% { box-shadow: 0 0 30px #ffff00, 0 0 50px #ffff00; transform: scale(1.05); }
+            100% { box-shadow: 0 0 10px #ffff00, 0 0 20px #ffff00; transform: scale(1); }
+        }
+        
+        .pulse-btn {
+            animation: pulse-neon 1.5s infinite;
+        }
+    </style>
+</head>
+<button id="global-skip" onclick="window.location.href='chaotic_finale.html'" style="position: fixed; bottom: 20px; left: 20px; padding: 12px 20px; background: rgba(0, 0, 0, 0.9); color: #ff00ff; border: 2px solid #ff00ff; border-radius: 30px; font-weight: bold; cursor: pointer; z-index: 9999; display: none; box-shadow: 0 4px 10px rgba(255,0,255,0.3);">Skip ⏭️</button>
+<script>setTimeout(() => { document.getElementById('global-skip').style.display = 'block'; }, 1000);</script>
+<body class="min-h-screen flex flex-col md:flex-row relative">
+
+    <!-- OBJECTION Flash -->
+    <div id="flash-objection" class="flash-overlay flash-objection">
+        <h1 class="text-jagged text-objection uppercase tracking-widest text-center leading-none">
+            Objection!
+        </h1>
+    </div>
+
+    <!-- SUSTAINED Flash -->
+    <div id="flash-sustained" class="flash-overlay flash-sustained">
+        <h1 class="font-dramatic text-8xl md:text-9xl text-sustained uppercase tracking-widest text-center leading-none">
+            Sustained!
+        </h1>
+    </div>
+
+    <div id="custom-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-gray-900 border-4 neon-magenta p-8 md:p-12 max-w-lg w-11/12 text-center rounded-xl transform scale-90 transition-transform duration-300" id="modal-content">
+            <h2 class="font-dramatic text-5xl neon-yellow mb-6">Court Apology</h2>
+            <p class="text-xl md:text-2xl mb-8 leading-relaxed">
+                The court apologizes profusely, counselor. However, the evidence is overwhelming. <br><br><span class="text-red-500 font-bold uppercase tracking-widest text-3xl">Overruled!</span>
+            </p>
+            <button onclick="closeModal()" class="px-8 py-3 bg-transparent border-2 border-cyan-400 text-cyan-400 font-bold text-xl uppercase hover:bg-cyan-400 hover:text-black transition-colors rounded">
+                Resume Cross-Examination
+            </button>
+        </div>
+    </div>
+
+    <div class="w-full md:w-2/5 min-h-[40vh] md:min-h-screen p-6 md:p-12 flex flex-col items-center justify-center border-b-4 md:border-b-0 md:border-r-4 border-[#333]">
+        <div class="relative group">
+            <!-- Neon glow backing -->
+            <div class="absolute -inset-1 bg-gradient-to-r from-[#ff00ff] to-[#00ffff] rounded-lg blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-pulse"></div>
+            
+            <div class="relative bg-black rounded-lg border-4 neon-magenta overflow-hidden max-w-xs md:max-w-md">
+                <img src="1000231832.png" alt="Judge Velvet" class="w-full h-auto object-cover opacity-90 sepia-[.2] contrast-125" onerror="this.src='https://placehold.co/400x500/111/ff00ff?text=Judge+Velvet'">
+                <div class="absolute bottom-0 left-0 w-full bg-black/70 backdrop-blur-md p-3 border-t-2 border-magenta-500">
+                    <h2 class="font-dramatic text-3xl text-center text-white tracking-widest">Hon. Judge Velvet Noir</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="w-full md:w-3/5 p-6 md:p-12 flex flex-col justify-center relative">
+        
+        <div id="trivia-container" class="max-w-2xl w-full mx-auto bg-gray-900/80 backdrop-blur-sm border-2 neon-cyan p-8 rounded-2xl shadow-2xl relative z-10">
+            
+            <!-- Progress indicator -->
+            <div class="flex justify-between items-center mb-8 border-b-2 border-gray-700 pb-4">
+                <h3 class="font-dramatic text-3xl text-cyan-400 tracking-wider">Cross-Examination</h3>
+                <span class="bg-gray-800 text-magenta-400 font-bold px-4 py-1 rounded-full text-lg border border-[#ff00ff]" id="q-counter">Exhibit 1/3</span>
+            </div>
+
+            <!-- Question Text -->
+            <h1 id="question-text" class="text-3xl md:text-4xl font-black mb-10 leading-tight neon-yellow drop-shadow-md">
+                Loading testimony...
+            </h1>
+
+            <!-- Options Container -->
+            <div id="options-container" class="flex flex-col gap-4">
+                <!-- Buttons injected via JS -->
+            </div>
+            
+        </div>
+
+        <!-- Final Victory Screen (Hidden initially) -->
+        <div id="victory-container" class="hidden absolute inset-0 flex flex-col items-center justify-center p-6 bg-black/90 backdrop-blur-md z-20">
+            <h1 class="font-dramatic text-6xl md:text-8xl neon-yellow mb-4 text-center">NO FURTHER QUESTIONS.</h1>
+            <p class="text-xl md:text-2xl text-cyan-300 mb-12 text-center max-w-lg">
+                The jury has reached a verdict on the chaos. Proceed to sentencing.
+            </p>
+            <a href="chaotic_finale.html" class="pulse-btn inline-block px-12 py-6 bg-yellow-400 text-black font-black text-3xl md:text-4xl uppercase rounded-lg border-4 border-yellow-200 hover:bg-yellow-300 transition-colors shadow-[0_0_30px_#ffff00]">
+                Get Final Verdict ⚡
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Trivia Data Structure
+        const triviaData = [
+            {
+                question: "Define 'Gappe' in a court of law.",
+                options: [
+                    { text: "A fundamental human right", type: "correct" },
+                    { text: "Wasting time", type: "wrong" },
+                    { text: "The only cardio you actually do", type: "wrong" }
+                ]
+            },
+            {
+                question: "What carries more weight: your legal arguments or those thick thighs?",
+                options: [
+                    { text: "My impeccable logic", type: "wrong" },
+                    { text: "The thighs, obviously", type: "correct" },
+                    { text: "Objection, leading the witness!", type: "custom" }
+                ]
+            },
+            {
+                question: "Which phrase is legally binding before ending a phone call?",
+                options: [
+                    { text: "Bye", type: "wrong" },
+                    { text: "Talk later", type: "wrong" },
+                    { text: "Don't miss me", type: "correct" }
+                ]
+            }
+        ];
+
+        let currentIndex = 0;
+        let isAnimating = false; // Prevent clicks during flashes
+
+        // DOM Elements
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const qCounter = document.getElementById('q-counter');
+        const triviaContainer = document.getElementById('trivia-container');
+        const victoryContainer = document.getElementById('victory-container');
+        
+        const flashObjection = document.getElementById('flash-objection');
+        const flashSustained = document.getElementById('flash-sustained');
+        
+        const modal = document.getElementById('custom-modal');
+        const modalContent = document.getElementById('modal-content');
+
+        function initTrivia() {
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const data = triviaData[currentIndex];
+            
+            // Update counter and text
+            qCounter.innerText = `Exhibit ${currentIndex + 1}/3`;
+            questionText.innerText = data.question;
+            
+            // Clear old options
+            optionsContainer.innerHTML = '';
+            
+            // Shuffle options for chaos (optional, but let's keep it static to preserve joke delivery order)
+            data.options.forEach((opt) => {
+                const btn = document.createElement('button');
+                btn.className = 'btn-chaos w-full text-left bg-gray-800 text-white font-bold text-xl md:text-2xl p-4 md:p-6 rounded-lg border-2 border-gray-600 shadow-md';
+                btn.innerText = opt.text;
+                btn.onclick = () => handleAnswer(opt.type);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function handleAnswer(type) {
+            if (isAnimating) return;
+
+            if (type === 'custom') {
+                showModal();
+            } else if (type === 'wrong') {
+                triggerObjection();
+            } else if (type === 'correct') {
+                triggerSustained();
+            }
+        }
+
+        function triggerObjection() {
+            isAnimating = true;
+            flashObjection.classList.add('flash-active');
+            
+            // Shake the trivia container too for extra chaos
+            triviaContainer.style.transform = "translateX(10px)";
+            setTimeout(() => triviaContainer.style.transform = "translateX(-10px)", 50);
+            setTimeout(() => triviaContainer.style.transform = "translateX(10px)", 100);
+            setTimeout(() => triviaContainer.style.transform = "translateX(0)", 150);
+
+            // Hide after 1 second
+            setTimeout(() => {
+                flashObjection.classList.remove('flash-active');
+                isAnimating = false;
+            }, 1000);
+        }
+
+        function triggerSustained() {
+            isAnimating = true;
+            flashSustained.classList.add('flash-active');
+            
+            setTimeout(() => {
+                flashSustained.classList.remove('flash-active');
+                
+                // Move to next question or end
+                currentIndex++;
+                if (currentIndex < triviaData.length) {
+                    renderQuestion();
+                    isAnimating = false;
+                } else {
+                    showVictory();
+                }
+            }, 1200);
+        }
+
+        function showVictory() {
+            triviaContainer.classList.add('hidden');
+            victoryContainer.classList.remove('hidden');
+        }
+
+        // Custom Modal Logic (Replacing alert)
+        function showModal() {
+            modal.classList.remove('hidden');
+            // Allow small delay for block rendering before animating opacity
+            setTimeout(() => {
+                modal.classList.remove('opacity-0', 'pointer-events-none');
+                modalContent.classList.remove('scale-90');
+                modalContent.classList.add('scale-100');
+            }, 10);
+        }
+
+        function closeModal() {
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            modalContent.classList.remove('scale-100');
+            modalContent.classList.add('scale-90');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        // Start the game
+        window.onload = initTrivia;
+
+    </script>
+</body>
+</html>

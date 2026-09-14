@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Wish Hunt - Velvet's Journey</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&family=Lora:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        body {
+            /* Lora provides a soft, elegant reading experience */
+            font-family: 'Lora', serif; 
+            margin: 0;
+            background: radial-gradient(circle at top right, #ffffff, #FDFBF7, #EFE8DD);
+            color: #4A3B32; 
+            min-height: 100vh;
+            overflow-x: hidden;
+            user-select: none; /* Prevent accidental text selection while hunting */
+        }
+
+        .font-serif-main {
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* Fluidly hide items when found */
+        .item-found {
+            transform: scale(0) rotate(90deg) translateY(-30px) !important;
+            opacity: 0;
+            pointer-events: none;
+            filter: blur(4px);
+        }
+
+        /* Subtle vintage filter for the squirrel to match the Old Money vibe */
+        .vintage-emoji {
+            filter: sepia(0.65) hue-rotate(-15deg) saturate(1.2) opacity(0.8) drop-shadow(0 4px 6px rgba(142, 115, 91, 0.15));
+            font-size: 2.5rem;
+            line-height: 1;
+        }
+
+        /* Subtle pulsing animation to hint at interactivity */
+        @keyframes gentle-float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+        }
+        
+        .float-subtle {
+            animation: gentle-float 4s ease-in-out infinite;
+        }
+
+        /* NEW: Cloud Bubble Styles */
+        .cloud-bubble {
+            position: fixed;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(197, 168, 128, 0.3);
+            box-shadow: 0 10px 30px rgba(197, 168, 128, 0.15);
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-family: 'Playfair Display', serif;
+            color: #8E735B;
+            font-style: italic;
+            font-size: 1.25rem;
+            white-space: nowrap;
+            pointer-events: none;
+            z-index: 100;
+            opacity: 0;
+            animation: cloudRise 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+
+        /* Tail of the speech bubble */
+        .cloud-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%) rotate(45deg);
+            width: 12px;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.95);
+            border-right: 1px solid rgba(197, 168, 128, 0.3);
+            border-bottom: 1px solid rgba(197, 168, 128, 0.3);
+        }
+
+        @keyframes cloudRise {
+            0% { opacity: 0; transform: translate(-50%, 20px) scale(0.9); }
+            100% { opacity: 1; transform: translate(-50%, -50px) scale(1); }
+        }
+    </style>
+</head>
+<button id="global-skip" onclick="window.location.href='finale.html'" style="position: fixed; bottom: 20px; left: 20px; padding: 12px 20px; background: rgba(142, 115, 91, 0.9); color: #fff; border: 1px solid #E5D5C1; border-radius: 30px; font-weight: bold; cursor: pointer; z-index: 9999; display: none; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">Skip ⏭️</button>
+<script>setTimeout(() => { document.getElementById('global-skip').style.display = 'block'; }, 1000);</script>
+<body class="flex flex-col items-center">
+
+    <div class="relative z-20 text-center w-full max-w-3xl mx-auto pt-16 px-4">
+        <h1 class="font-serif-main text-[#8E735B] text-3xl md:text-5xl mb-3 drop-shadow-sm font-semibold tracking-wide">
+            The Wish Hunt
+        </h1>
+        <p class="text-[#A48F7A] text-lg italic tracking-widest font-light">
+            Seek the pieces of our story...
+        </p>
+        
+        <!-- Live counter for remaining items -->
+        <p id="counter-text" class="text-[#8E735B]/70 text-xs md:text-sm uppercase tracking-[0.3em] mt-6 transition-opacity duration-1000">
+            <span id="items-left">3</span> pieces remaining
+        </p>
+    </div>
+
+    <div class="relative w-full h-[50vh] md:h-[60vh] max-w-5xl mx-auto mt-4 overflow-hidden pointer-events-none">
+        
+        <!-- Center Arch / Minimalist Mirror -->
+        <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-56 md:w-72 h-[22rem] md:h-[28rem] border border-[#C5A880]/30 rounded-t-full bg-gradient-to-t from-[#F2EBE1]/80 to-white/40 shadow-[0_8px_30px_rgba(197,168,128,0.1)] flex flex-col justify-end items-center pb-12 z-0">
+            <!-- Abstract art inside the arch -->
+            <div class="w-32 md:w-40 h-40 md:h-48 border border-[#E5D5C1] rounded-t-full mb-4 opacity-40 shadow-inner"></div>
+        </div>
+
+        <!-- The Desk Surface Line -->
+        <div class="absolute bottom-[2px] w-full h-px bg-gradient-to-r from-transparent via-[#C5A880]/40 to-transparent z-10"></div>
+
+        <!-- Left Side: Stack of Vintage Books -->
+        <div class="absolute bottom-0 left-[10%] md:left-[22%] flex flex-col items-center z-10">
+            <div class="w-28 md:w-36 h-5 bg-[#A48F7A]/30 backdrop-blur-sm border border-[#A48F7A]/40 rounded-sm mb-[2px] transform -rotate-2 shadow-sm"></div>
+            <div class="w-32 md:w-40 h-6 bg-[#8E735B]/20 backdrop-blur-sm border border-[#8E735B]/30 rounded-sm mb-[2px] shadow-sm"></div>
+            <div class="w-30 md:w-38 h-7 bg-[#C5A880]/25 backdrop-blur-sm border border-[#C5A880]/40 rounded-sm shadow-md"></div>
+        </div>
+
+        <!-- Right Side: Minimalist Vase & Botanical -->
+        <div class="absolute bottom-0 right-[15%] md:right-[25%] flex flex-col items-center z-10">
+            <!-- Botanical Branch SVG -->
+            <svg viewBox="0 0 100 200" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-24 h-36 md:h-48 text-[#A48F7A]/40 absolute bottom-16 -left-6 transform -rotate-12 pointer-events-none">
+                <path d="M50 200 Q 50 100 80 20"/>
+                <path d="M65 100 Q 80 80 90 90 Q 75 110 65 100"/>
+                <path d="M55 140 Q 30 120 20 140 Q 40 160 55 140"/>
+                <path d="M72 60 Q 90 40 100 50 Q 85 70 72 60"/>
+            </svg>
+            <!-- Frosted Glass Vase -->
+            <div class="w-16 md:w-20 h-24 md:h-32 bg-gradient-to-b from-[#ffffff]/60 to-[#E5D5C1]/80 backdrop-blur-md rounded-b-2xl rounded-t-sm border border-[#C5A880]/30 shadow-[inset_-4px_-4px_12px_rgba(197,168,128,0.2)]"></div>
+        </div>
+        
+        
+        <!-- HIDDEN ITEM 1: Dumbbell (Resting gently on the stack of books) -->
+        <div onclick="findItem(this, '5 minutes aur?')" class="absolute bottom-[42px] md:bottom-[45px] left-[15%] md:left-[26%] cursor-pointer hover:scale-110 hover:-translate-y-1 transition-all duration-[600ms] z-20 group float-subtle pointer-events-auto">
+            <div class="absolute inset-0 bg-[#C5A880] rounded-full blur-xl opacity-0 group-hover:opacity-50 transition-opacity duration-500"></div>
+            <!-- Elegant Minimalist Dumbbell SVG -->
+            <svg viewBox="0 0 24 24" fill="currentColor" class="w-8 md:w-10 h-8 md:h-10 text-[#8E735B]/70 drop-shadow-[0_2px_4px_rgba(0,0,0,0.1)]">
+                <rect x="3" y="5" width="3" height="14" rx="1"/>
+                <rect x="18" y="5" width="3" height="14" rx="1"/>
+                <rect x="0" y="8" width="3" height="8" rx="0.5"/>
+                <rect x="21" y="8" width="3" height="8" rx="0.5"/>
+                <rect x="6" y="10" width="12" height="4"/>
+            </svg>
+        </div>
+
+        <!-- HIDDEN ITEM 2: Law Book (Leaning casually against the central arch) -->
+        <div onclick="findItem(this, 'will u dance with me?')" class="absolute bottom-0 left-[35%] md:left-[42%] transform rotate-[15deg] cursor-pointer hover:scale-105 hover:-translate-y-1 transition-all duration-[600ms] z-20 group pointer-events-auto">
+            <div class="absolute inset-0 bg-[#C5A880] rounded-full blur-xl opacity-0 group-hover:opacity-50 transition-opacity duration-500"></div>
+            <!-- Intricate Law Book SVG -->
+            <svg viewBox="0 0 24 24" fill="currentColor" class="w-10 md:w-12 h-10 md:h-12 text-[#A48F7A]/80 drop-shadow-[0_4px_6px_rgba(0,0,0,0.15)]">
+                <path d="M21 4H6.5A2.5 2.5 0 0 0 4 6.5v13A2.5 2.5 0 0 0 6.5 22H21V4Z" fill="#F2EBE1" stroke="#8E735B" stroke-width="0.5"/>
+                <path d="M4 6.5A2.5 2.5 0 0 1 6.5 4H8v18H6.5A2.5 2.5 0 0 1 4 19.5v-13Z" fill="#C5A880" stroke="#8E735B" stroke-width="0.5"/>
+                <path d="M21 6H8v14h13V6Z" fill="#ffffff" opacity="0.6"/>
+                <path d="M11 6v8l2-1.5 2 1.5V6H11Z" fill="#8E735B"/>
+                <!-- Law Scales Etching -->
+                <path d="M14.5 11l-2 3h4l-2-3zm0 -2v2m-3 4h6" stroke="#8E735B" stroke-width="0.75" fill="none"/>
+            </svg>
+        </div>
+
+        <!-- HIDDEN ITEM 3: Squirrel (Peeking playfully from behind the vase) -->
+        <div onclick="findItem(this, 'stay on call na ..')" class="absolute bottom-[5px] right-[10%] md:right-[22%] transform -rotate-6 cursor-pointer hover:scale-110 hover:translate-x-2 transition-all duration-[600ms] z-0 group pointer-events-auto">
+            <div class="absolute inset-0 bg-[#C5A880] rounded-full blur-xl opacity-0 group-hover:opacity-50 transition-opacity duration-500"></div>
+            <!-- Vintage filtered emoji -->
+            <div class="vintage-emoji">🐿️</div>
+        </div>
+
+    </div>
+
+    <div id="win-overlay" class="fixed inset-0 bg-[#FDFBF7]/90 backdrop-blur-md flex flex-col items-center justify-center z-50 transition-opacity duration-[2500ms] opacity-0 pointer-events-none hidden">
+        <div class="text-center px-6">
+            <h1 class="font-serif-main text-[#8E735B] text-5xl md:text-7xl italic mb-8 font-light drop-shadow-sm scale-95 transition-transform duration-[2500ms]" id="finale-title">
+                Happy Birthday Velvet
+            </h1>
+            <div class="w-32 h-[1px] bg-[#C5A880] mx-auto mb-12 opacity-60"></div>
+            
+            <button onclick="goToFinale()" class="px-10 py-4 bg-transparent border border-[#C5A880] text-[#8E735B] hover:bg-[#C5A880] hover:text-white transition-all duration-500 rounded-full font-serif-main uppercase tracking-[0.25em] text-sm shadow-sm hover:shadow-lg opacity-0 translate-y-6" id="finale-btn">
+                Continue to Finale
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let foundCount = 0;
+        
+        // Synthesizes a soft, elegant 'ping' using Web Audio API (No external sound files needed!)
+        function playPing() {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                
+                // Soft bell-like frequency
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); // A5 note
+                oscillator.frequency.exponentialRampToValueAtTime(440, audioCtx.currentTime + 0.6); // Drop to A4
+                
+                // Smooth volume envelope
+                gainNode.gain.setValueAtTime(0.08, audioCtx.currentTime); // Very soft
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.6);
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + 0.6);
+            } catch(e) {
+                console.log("Audio skipped or not supported.");
+            }
+        }
+
+        function findItem(element, phrase) {
+            // Prevent double clicks
+            if (element.classList.contains('item-found')) return;
+            
+            // Trigger visual vanish and audio cue
+            element.classList.add('item-found');
+            playPing();
+            
+            // Create and append the rising cloud phrase
+            const rect = element.getBoundingClientRect();
+            const cloud = document.createElement('div');
+            cloud.className = 'cloud-bubble';
+            cloud.innerText = phrase;
+            
+            // Position it exactly centered above the item
+            cloud.style.left = (rect.left + rect.width / 2) + 'px';
+            cloud.style.top = rect.top + 'px';
+            
+            document.body.appendChild(cloud);
+            
+            // Update logic
+            foundCount++;
+            
+            // Update the counter UI
+            const left = 3 - foundCount;
+            if (left > 0) {
+                document.getElementById('items-left').innerText = left;
+            } else {
+                document.getElementById('counter-text').classList.add('opacity-0');
+            }
+            
+            // Check for Win Condition
+            if (foundCount === 3) {
+                setTimeout(showFinale, 3000); // Wait for the clouds to settle before showing overlay
+            }
+        }
+
+        function showFinale() {
+            const overlay = document.getElementById('win-overlay');
+            const title = document.getElementById('finale-title');
+            const btn = document.getElementById('finale-btn');
+            
+            overlay.classList.remove('hidden');
+            
+            // Trigger overlay fade in
+            requestAnimationFrame(() => {
+                overlay.classList.remove('pointer-events-none', 'opacity-0');
+                
+                // Trigger title scale-up gracefully
+                setTimeout(() => {
+                    title.classList.remove('scale-95');
+                    title.classList.add('scale-100');
+                }, 100);
+                
+                // Float the button in after a cinematic delay
+                setTimeout(() => {
+                    btn.classList.remove('opacity-0', 'translate-y-6');
+                }, 2000);
+            });
+        }
+
+        function goToFinale() {
+            const btn = document.getElementById('finale-btn');
+            btn.innerHTML = "Opening Finale...";
+            btn.style.opacity = '0.5';
+            
+            setTimeout(() => {
+                 window.location.href = 'finale.html';
+                 console.log("Proceeding to the Grand Finale...");
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

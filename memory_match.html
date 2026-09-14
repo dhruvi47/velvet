@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Gappe Gallery - Velvet's Journey</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&family=Lora:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        body {
+            /* Using Lora for a softer, more elegant secondary font compared to Poppins */
+            font-family: 'Lora', serif; 
+            margin: 0;
+            /* Soft, creamy ivory background with a warm radial glow */
+            background: radial-gradient(circle at top right, #ffffff, #FDFBF7, #F2EBE1);
+            color: #4A3B32; /* Warm, deep brown for text */
+            min-height: 100vh;
+        }
+
+        .font-serif-main {
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* 3D Card Flip Mechanics & Smooth Easing */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+
+        .transform-style-3d {
+            transform-style: preserve-3d;
+        }
+
+        .backface-hidden {
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+
+        /* The gentle hover lift effect on the outer container */
+        .card {
+            transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-6px);
+        }
+
+        /* Incredibly smooth and slightly elegant flip timing */
+        .card-inner {
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            width: 100%;
+            height: 100%;
+            box-shadow: 0 4px 20px rgba(197, 168, 128, 0.15); /* Soft gold shadow */
+            border-radius: 0.75rem;
+        }
+
+        .is-flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+
+        /* Card Front (The image) */
+        .card-front {
+            transform: rotateY(180deg);
+            background-color: #fff;
+        }
+
+        /* Card Back (The Light Monogram) */
+        .card-back {
+            background: linear-gradient(135deg, #FFFFFF, #FDFBF7);
+            /* Subtle, elegant pattern */
+            background-image: radial-gradient(#C5A880 0.5px, transparent 0.5px);
+            background-size: 16px 16px;
+            background-position: 0 0;
+        }
+
+        /* Win Overlay Text Animation */
+        .phrase {
+            opacity: 0;
+            transform: translateY(15px);
+            /* Extremely slow, graceful fade in */
+            transition: opacity 2.5s ease-out, transform 2.5s ease-out;
+        }
+
+        .phrase.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Custom scrollbar for an airy feel */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #E5D5C1;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<button id="global-skip" onclick="window.location.href='wish_hunt.html'" style="position: fixed; bottom: 20px; left: 20px; padding: 12px 20px; background: rgba(142, 115, 91, 0.9); color: #fff; border: 1px solid #E5D5C1; border-radius: 30px; font-weight: bold; cursor: pointer; z-index: 9999; display: none; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">Skip ⏭️</button>
+<script>setTimeout(() => { document.getElementById('global-skip').style.display = 'block'; }, 1000);</script>
+<body class="flex flex-col items-center py-12 px-4 overflow-x-hidden">
+
+    <div class="relative z-10 text-center mb-10 w-full max-w-2xl mx-auto">
+        <h1 class="font-serif-main text-[#8E735B] text-4xl md:text-5xl lg:text-6xl mb-3 drop-shadow-sm font-semibold tracking-wide">
+            The "Gappe" Gallery
+        </h1>
+        <p class="text-[#A48F7A] text-lg italic tracking-widest font-light">
+            Match the memories, Velvet.
+        </p>
+        <div class="w-16 h-[1px] bg-[#C5A880] mx-auto mt-6 opacity-60"></div>
+    </div>
+
+    <!-- The Game Board (CSS Grid) - 12 cards total (3x4 or 4x3) -->
+    <div id="game-board" class="relative z-10 grid grid-cols-3 sm:grid-cols-4 gap-4 md:gap-6 w-full max-w-3xl mx-auto perspective-1000">
+        <!-- Cards will be generated here by JavaScript -->
+    </div>
+
+    <div id="win-overlay" class="fixed inset-0 bg-[#FDFBF7]/85 backdrop-blur-lg flex flex-col items-center justify-center z-50 transition-opacity duration-[2000ms] opacity-0 pointer-events-none hidden">
+        
+        <div class="text-center px-4 max-w-2xl w-full flex flex-col items-center">
+            
+            <svg class="phrase w-12 h-12 text-[#C5A880] mb-8 opacity-0" id="phrase-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+
+            <!-- Sequential Phrases -->
+            <div id="phrase-1" class="phrase font-serif-main text-[#8E735B] text-2xl md:text-4xl italic mb-6 font-light">
+                "5 minutes aur?"
+            </div>
+            
+            <div id="phrase-2" class="phrase font-serif-main text-[#8E735B] text-2xl md:text-4xl italic mb-6 font-light">
+                "will u dance with me?"
+            </div>
+            
+            <div id="phrase-3" class="phrase font-serif-main text-[#8E735B] text-2xl md:text-4xl italic mb-14 font-light">
+                "stay on call na .."
+            </div>
+            
+            <!-- Continue Button -->
+            <button id="continue-btn" onclick="continueJourney()" class="phrase opacity-0 mt-4 px-10 py-3 bg-transparent border border-[#C5A880] text-[#8E735B] hover:bg-[#C5A880] hover:text-white transition-all duration-500 rounded-full font-serif-main uppercase tracking-[0.25em] text-xs md:text-sm shadow-sm hover:shadow-lg">
+                Continue Journey
+            </button>
+        </div>
+        
+    </div>
+
+    <script>
+        // Select 6 unique images for a 12-card board (lighter aesthetic, better spacing)
+        const imageFiles = [
+            "couple1.jpg",
+            "couple2.jpg",
+            // "couple3.jpg",
+            // "couple4.jpg",
+            "couple5.jpg",
+            "couple6.jpg",
+            "couple7.jpg",
+            "couple8.jpg", 
+            "couple9.jpg",
+            "couple10.jpg",
+        ];
+
+        // Create pairs to make 12 cards total
+        let cards = [...imageFiles, ...imageFiles];
+
+        // Game State Variables
+        let flippedCards = [];
+        let matchedPairs = 0;
+        let isLocked = false;
+        const totalPairs = imageFiles.length;
+
+        const board = document.getElementById('game-board');
+        const winOverlay = document.getElementById('win-overlay');
+
+        // Shuffle function (Fisher-Yates)
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function initializeGame() {
+            cards = shuffle(cards);
+            
+            cards.forEach((imgSrc) => {
+                // Create Card Container
+                const card = document.createElement('div');
+                card.className = 'card w-full aspect-[3/4] cursor-pointer group perspective-1000';
+                card.dataset.name = imgSrc;
+                
+                // Create Card Inner (handles the 3D flip)
+                const cardInner = document.createElement('div');
+                cardInner.className = 'card-inner transform-style-3d border border-[#E5D5C1]/40 group-hover:border-[#C5A880]/60 transition-colors duration-500';
+                
+                // Create Card Back (The Light Monogram)
+                const cardBack = document.createElement('div');
+                cardBack.className = 'card-back absolute inset-0 backface-hidden rounded-xl flex items-center justify-center overflow-hidden';
+                cardBack.innerHTML = `
+                    <div class="relative z-10 w-14 h-14 sm:w-16 sm:h-16 border border-[#C5A880]/50 rounded-full flex items-center justify-center bg-white/70 backdrop-blur-sm shadow-sm">
+                        <span class="font-serif-main text-[#8E735B] text-xl sm:text-2xl italic font-semibold">VN</span>
+                    </div>
+                `;
+
+                // Create Card Front (The Image)
+                const cardFront = document.createElement('div');
+                cardFront.className = 'card-front absolute inset-0 backface-hidden rounded-xl overflow-hidden border border-[#E5D5C1]';
+                // Added a soft pastel placeholder fallback
+                cardFront.innerHTML = `
+                    <img src="${imgSrc}" class="w-full h-full object-cover" alt="Memory" onerror="this.src='https://placehold.co/300x400/F4EEE1/8E735B?text=Memory'" />
+                `;
+
+                // Assemble Card
+                cardInner.appendChild(cardBack);
+                cardInner.appendChild(cardFront);
+                card.appendChild(cardInner);
+
+                // Add Event Listener
+                card.addEventListener('click', () => flipCard(card));
+                
+                // Add to Board
+                board.appendChild(card);
+            });
+        }
+
+        function flipCard(card) {
+            // Prevent flipping if board is locked, or if the card is already flipped
+            if (isLocked || card.classList.contains('is-flipped')) return;
+
+            card.classList.add('is-flipped');
+            flippedCards.push(card);
+
+            if (flippedCards.length === 2) {
+                checkMatch();
+            }
+        }
+
+        function checkMatch() {
+            isLocked = true;
+            const [card1, card2] = flippedCards;
+            const isMatch = card1.dataset.name === card2.dataset.name;
+
+            if (isMatch) {
+                disableCards();
+            } else {
+                unflipCards();
+            }
+        }
+
+        function disableCards() {
+            // Cards matched! Remove hover lift effect for matched cards
+            flippedCards.forEach(c => {
+                c.classList.remove('group');
+                c.style.cursor = 'default';
+            });
+            
+            matchedPairs++;
+            flippedCards = [];
+            isLocked = false;
+
+            // Check Win Condition
+            if (matchedPairs === totalPairs) {
+                setTimeout(showWinScreen, 1200); // Wait for the last flip animation to finish
+            }
+        }
+
+        function unflipCards() {
+            // Not a match, flip back after a slightly longer delay for the airy aesthetic
+            setTimeout(() => {
+                flippedCards[0].classList.remove('is-flipped');
+                flippedCards[1].classList.remove('is-flipped');
+                flippedCards = [];
+                isLocked = false;
+            }, 1200);
+        }
+
+        function showWinScreen() {
+            winOverlay.classList.remove('hidden');
+            
+            // Trigger fade in of the overlay background
+            requestAnimationFrame(() => {
+                winOverlay.classList.remove('opacity-0');
+                winOverlay.classList.add('pointer-events-auto');
+            });
+
+            // Sequence the text animations with very slow, elegant pacing
+            const icon = document.getElementById('phrase-icon');
+            const p1 = document.getElementById('phrase-1');
+            const p2 = document.getElementById('phrase-2');
+            const p3 = document.getElementById('phrase-3');
+            const btn = document.getElementById('continue-btn');
+
+            setTimeout(() => icon.classList.add('show'), 1500); 
+            setTimeout(() => p1.classList.add('show'), 3500); 
+            setTimeout(() => p2.classList.add('show'), 6000); 
+            setTimeout(() => p3.classList.add('show'), 8500); 
+            setTimeout(() => btn.classList.add('show'), 11000); 
+        }
+
+        // Action for the final button
+        function continueJourney() {
+            // Replaces alert with a visually consistent message approach if needed, 
+            // but normally this redirects to the Wish Hunt
+            const btn = document.getElementById('continue-btn');
+            btn.innerHTML = "Opening Wish Hunt...";
+            btn.style.opacity = '0.5';
+            
+            setTimeout(() => {
+                 window.location.href = 'wish_hunt.html';
+                 console.log("Proceeding to The Wish Hunt...");
+            }, 1000);
+        }
+
+        // Start the game on load
+        window.onload = initializeGame;
+    </script>
+</body>
+</html>

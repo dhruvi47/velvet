@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Flappy Squirrel - Chaotic Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #111;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            touch-action: none; /* Prevent scroll on touch */
+        }
+
+        #game-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            height: 100vh;
+            max-height: 800px;
+            background: linear-gradient(135deg, #00ffcc, #ff0055);
+            background-size: 200% 200%;
+            animation: chaoticBG 3s ease infinite alternate;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            transition: background 0.1s;
+        }
+
+        @keyframes chaoticBG {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* UI Overlays */
+        #score-board {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 3rem;
+            font-weight: 900;
+            color: white;
+            text-shadow: 3px 3px 0 #000, -2px -2px 0 #ff0055, 2px -2px 0 #00ffcc;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        /* Game Over State */
+        .game-over-active #game-wrapper {
+            background: #ff0000 !important;
+            animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both infinite;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translate3d(0, 0, 0); }
+            10%, 30%, 50%, 70%, 90% { transform: translate3d(-10px, 0, 0); }
+            20%, 40%, 60%, 80% { transform: translate3d(10px, 0, 0); }
+        }
+
+        #game-over-screen {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(255, 0, 0, 0.7);
+            z-index: 20;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        #game-over-screen.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .flashing-text {
+            font-size: 4rem;
+            font-weight: 900;
+            color: yellow;
+            text-transform: uppercase;
+            text-shadow: 5px 5px 0px #000;
+            text-align: center;
+            line-height: 1.1;
+            animation: flash 0.2s infinite alternate;
+            margin-bottom: 2rem;
+        }
+
+        @keyframes flash {
+            0% { color: yellow; transform: scale(1); }
+            100% { color: white; transform: scale(1.1) rotate(-3deg); }
+        }
+
+        .btn {
+            font-size: 1.2rem;
+            font-weight: bold;
+            padding: 12px 24px;
+            margin: 10px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            text-transform: uppercase;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transition: transform 0.1s;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-retry {
+            background-color: #000;
+            color: #fff;
+            border: 3px solid yellow;
+        }
+
+        .btn-proceed {
+            background-color: #00ffcc;
+            color: #000;
+            border: 3px solid #000;
+            display: none; /* Shown via JS */
+        }
+        
+        .btn-proceed.show {
+            display: block;
+            animation: pulse 1s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.05); }
+        }
+    </style>
+</head>
+<button id="global-skip" onclick="window.location.href='trivia.html'" style="position: fixed; bottom: 20px; left: 20px; padding: 12px 20px; background: rgba(0, 0, 0, 0.9); color: #00ffcc; border: 2px solid #00ffcc; border-radius: 30px; font-weight: bold; cursor: pointer; z-index: 9999; display: none; box-shadow: 0 4px 10px rgba(0,255,204,0.3);">Skip ⏭️</button>
+<script>setTimeout(() => { document.getElementById('global-skip').style.display = 'block'; }, 1000);</script>
+<body>
+
+    <div id="game-wrapper">
+        <div id="score-board">0</div>
+        <canvas id="gameCanvas"></canvas>
+        
+        <div id="game-over-screen">
+            <div class="flashing-text">KOHLI<br>KUTTA!</div>
+            <p id="score-msg" class="text-white font-bold text-xl mb-4 bg-black/50 px-4 py-1 rounded">Score: 0</p>
+            <button class="btn btn-retry" onclick="resetGame()">Try Again 🔄</button>
+            <button id="btn-proceed" class="btn btn-proceed" onclick="proceedToTrivia()">Proceed to Trivia ➡️</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreBoard = document.getElementById('score-board');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        const wrapper = document.getElementById('game-wrapper');
+        const btnProceed = document.getElementById('btn-proceed');
+        const scoreMsg = document.getElementById('score-msg');
+
+        // Responsive Canvas
+        function resize() {
+            canvas.width = wrapper.clientWidth;
+            canvas.height = wrapper.clientHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // Game Constants & State
+        let frames = 0;
+        let score = 0;
+        let gameActive = true;
+        let hasStarted = false; // Wait for first click to apply gravity
+        
+        const SQUIRREL_SIZE = 40;
+        const GRAVITY = 0.5;
+        const JUMP = -8;
+        const PIPE_WIDTH = 70;
+        const PIPE_GAP = 180;
+        const PIPE_SPEED = 3;
+
+        // Player (Squirrel) Object
+        const squirrel = {
+            x: canvas.width / 3,
+            y: canvas.height / 2,
+            vy: 0,
+            radius: SQUIRREL_SIZE / 2,
+            
+            draw() {
+                // Draw a chaotic squirrel emoji
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                // Rotate slightly based on velocity
+                let rotation = Math.min(Math.PI / 4, Math.max(-Math.PI / 4, (this.vy * 0.1)));
+                ctx.rotate(rotation);
+                ctx.font = `${SQUIRREL_SIZE}px Arial`;
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText("🐿️", 0, 0);
+                
+                // Hitbox debugger (optional)
+                // ctx.strokeStyle = "red";
+                // ctx.beginPath();
+                // ctx.arc(0, 0, this.radius - 5, 0, Math.PI*2);
+                // ctx.stroke();
+                
+                ctx.restore();
+            },
+            
+            update() {
+                if (!hasStarted) return;
+                this.vy += GRAVITY;
+                this.y += this.vy;
+                
+                // Floor / Ceiling collision
+                if (this.y + this.radius >= canvas.height || this.y - this.radius <= 0) {
+                    gameOver();
+                }
+            },
+            
+            flap() {
+                this.vy = JUMP;
+                hasStarted = true;
+            }
+        };
+
+        const pipes = {
+            items: [],
+            
+            draw() {
+                for (let i = 0; i < this.items.length; i++) {
+                    let p = this.items[i];
+                    
+                    // --- DRAW TOP PIPE (DUMBBELL) ---
+                    ctx.fillStyle = "#555"; // Iron gray
+                    // Bar
+                    ctx.fillRect(p.x + PIPE_WIDTH/2 - 5, 0, 10, p.top);
+                    // Weights
+                    ctx.fillStyle = "#333";
+                    ctx.fillRect(p.x, p.top - 40, PIPE_WIDTH, 40);
+                    ctx.fillRect(p.x + 10, p.top - 60, PIPE_WIDTH - 20, 20);
+
+                    // --- DRAW BOTTOM PIPE (LAW BOOK) ---
+                    // Main book cover
+                    ctx.fillStyle = "#4A3B32"; // Vintage Brown
+                    ctx.fillRect(p.x, canvas.height - p.bottom, PIPE_WIDTH, p.bottom);
+                    
+                    // Book pages (White/Cream lines on the side)
+                    ctx.fillStyle = "#FDFBF7";
+                    ctx.fillRect(p.x + 10, canvas.height - p.bottom + 10, PIPE_WIDTH - 10, p.bottom - 10);
+                    
+                    // Lines for pages
+                    ctx.strokeStyle = "#C5A880";
+                    ctx.lineWidth = 1;
+                    for(let j = canvas.height - p.bottom + 20; j < canvas.height; j+= 10) {
+                        ctx.beginPath();
+                        ctx.moveTo(p.x + 10, j);
+                        ctx.lineTo(p.x + PIPE_WIDTH, j);
+                        ctx.stroke();
+                    }
+                    
+                    // Book Spine Details
+                    ctx.fillStyle = "#2a1610";
+                    ctx.fillRect(p.x, canvas.height - p.bottom, 10, p.bottom);
+                    ctx.fillStyle = "#d4af37"; // Gold text hint
+                    ctx.fillRect(p.x + 2, canvas.height - p.bottom + 20, 6, 40);
+                }
+            },
+            
+            update() {
+                if (!hasStarted) return;
+                
+                // Add new pipes every 100 frames
+                if (frames % 100 === 0) {
+                    let topHeight = Math.max(50, Math.random() * (canvas.height - PIPE_GAP - 100));
+                    let bottomHeight = canvas.height - (topHeight + PIPE_GAP);
+                    
+                    this.items.push({
+                        x: canvas.width,
+                        top: topHeight,
+                        bottom: bottomHeight,
+                        passed: false
+                    });
+                }
+                
+                for (let i = 0; i < this.items.length; i++) {
+                    let p = this.items[i];
+                    p.x -= PIPE_SPEED;
+                    
+                    // Collision Detection (Circle vs Rectangle simplified)
+                    // Check X bounds
+                    if (squirrel.x + squirrel.radius - 5 > p.x && squirrel.x - squirrel.radius + 5 < p.x + PIPE_WIDTH) {
+                        // Check Y bounds (Top pipe or Bottom pipe)
+                        if (squirrel.y - squirrel.radius + 5 < p.top || squirrel.y + squirrel.radius - 5 > canvas.height - p.bottom) {
+                            gameOver();
+                        }
+                    }
+                    
+                    // Update Score
+                    if (p.x + PIPE_WIDTH < squirrel.x && !p.passed) {
+                        score++;
+                        scoreBoard.innerText = score;
+                        p.passed = true;
+                    }
+                    
+                    // Remove off-screen pipes
+                    if (p.x + PIPE_WIDTH < 0) {
+                        this.items.shift();
+                        i--;
+                    }
+                }
+            },
+            
+            reset() {
+                this.items = [];
+            }
+        };
+
+        function drawBackground() {
+            // Clearing canvas makes the CSS gradient shine through
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function gameLoop() {
+            if (!gameActive) return;
+            
+            drawBackground();
+            
+            pipes.update();
+            pipes.draw();
+            
+            squirrel.update();
+            squirrel.draw();
+            
+            if(hasStarted) frames++;
+            
+            requestAnimationFrame(gameLoop);
+        }
+
+        function gameOver() {
+            gameActive = false;
+            document.body.classList.add('game-over-active');
+            gameOverScreen.classList.add('show');
+            scoreMsg.innerText = "Score: " + score;
+            
+            // Show proceed button if score >= 5, or just immediately because it's funny
+            btnProceed.classList.add('show');
+        }
+
+        function resetGame() {
+            document.body.classList.remove('game-over-active');
+            gameOverScreen.classList.remove('show');
+            
+            squirrel.y = canvas.height / 2;
+            squirrel.vy = 0;
+            pipes.reset();
+            score = 0;
+            scoreBoard.innerText = score;
+            frames = 0;
+            hasStarted = false;
+            gameActive = true;
+            
+            gameLoop();
+        }
+
+        function proceedToTrivia() {
+            // Placeholder for trivia section redirection
+            console.log("Proceeding to Trivia screen!");
+            btnProceed.innerText = "Loading Trivia...";
+            // window.location.href = 'trivia.html';
+        }
+
+        // Input Listeners
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                if (gameActive) squirrel.flap();
+            }
+        });
+        
+        window.addEventListener('mousedown', () => {
+            if (gameActive) squirrel.flap();
+        });
+        
+        window.addEventListener('touchstart', (e) => {
+            if (gameActive) squirrel.flap();
+        }, {passive: false});
+
+        // Start Game
+        gameLoop();
+    </script>
+</body>
+</html>

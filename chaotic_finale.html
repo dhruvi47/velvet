@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Letter for Velvet</title>
+    
+    <!-- Elegant Fonts: Playfair Display for body, Great Vibes for cursive signatures and headers -->
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        body {
+            font-family: 'Playfair Display', serif;
+            margin: 0;
+            background: radial-gradient(circle at center, #FDFBF7 0%, #F2EBE1 100%);
+            color: #4A3B32; 
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+        }
+
+        .font-cursive {
+            font-family: 'Great Vibes', cursive;
+        }
+
+        /* Cinematic Staggered Fade-In Animations */
+        .fade-in-up {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 1.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Delay classes for staggered appearance */
+        .delay-100 { animation-delay: 0.5s; }
+        .delay-200 { animation-delay: 1.5s; }
+        .delay-300 { animation-delay: 3s; }
+        .delay-400 { animation-delay: 4.5s; }
+        .delay-500 { animation-delay: 5.5s; }
+        .delay-600 { animation-delay: 7s; }
+
+        /* The Vintage Letter Design */
+        .vintage-letter {
+            background-color: #FAFAFA;
+            background-image: 
+                linear-gradient(90deg, rgba(197, 168, 128, 0.03) 1px, transparent 1px),
+                linear-gradient(rgba(197, 168, 128, 0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+            box-shadow: 
+                0 20px 40px rgba(142, 115, 91, 0.08),
+                0 1px 3px rgba(142, 115, 91, 0.05),
+                inset 0 0 40px rgba(197, 168, 128, 0.1);
+            position: relative;
+        }
+
+        .vintage-letter::before {
+            content: '';
+            position: absolute;
+            inset: 6px;
+            border: 1px solid rgba(197, 168, 128, 0.3);
+            pointer-events: none;
+        }
+
+        /* Elegant Music Player Button */
+        .music-btn {
+            transition: all 0.4s ease;
+        }
+        .music-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(197, 168, 128, 0.2);
+            border-color: #C5A880;
+        }
+    </style>
+</head>
+<body class="py-12 px-4">
+
+    <!-- Minimalist Audio Player -->
+    <div class="fixed top-6 right-6 md:top-10 md:right-10 z-50 fade-in-up">
+        <audio id="bg-music" loop>
+            <source src="your-song-here.mp3" type="audio/mpeg">
+        </audio>
+        
+        <button id="play-pause-btn" onclick="toggleMusic()" class="music-btn w-12 h-12 rounded-full border border-[#E5D5C1] bg-white/60 backdrop-blur-md flex items-center justify-center text-[#8E735B] cursor-pointer shadow-sm">
+            <!-- Play Icon (Default) -->
+            <svg id="play-icon" class="w-5 h-5 ml-1" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z"/>
+            </svg>
+            <!-- Pause Icon (Hidden initially) -->
+            <svg id="pause-icon" class="w-5 h-5 hidden" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+            </svg>
+        </button>
+        <p class="text-[10px] uppercase tracking-widest text-[#A48F7A] mt-2 text-center absolute -bottom-5 w-full left-0">Play Me</p>
+    </div>
+
+    <!-- The Letter Container -->
+    <main class="vintage-letter max-w-2xl w-full mx-auto rounded-sm p-10 md:p-16 relative z-10">
+        
+        <!-- Wax Seal decorative element -->
+        <div class="absolute -top-6 left-1/2 -translate-x-1/2 w-12 h-12 bg-gradient-to-br from-[#8E735B] to-[#5C4A3D] rounded-full shadow-lg flex items-center justify-center fade-in-up">
+            <span class="font-cursive text-white text-2xl">V</span>
+        </div>
+
+        <div class="space-y-8 mt-4 text-[#5c4a3d] text-lg md:text-xl leading-relaxed">
+            
+            <p class="font-cursive text-4xl md:text-5xl text-[#8E735B] fade-in-up delay-100">
+                Dearest Velvet,
+            </p>
+            
+            <p class="fade-in-up delay-200">
+                Happy Birthday to my favorite squirrel. 
+            </p>
+            
+            <p class="fade-in-up delay-300">
+                As I sat down to think about what to say, I realized that my favorite moments are the quiet, in-between ones. Whether we are playfully arguing for <span class="italic text-[#8E735B]">"5 minutes aur?"</span>, dreaming of the day I can finally ask you, <span class="italic text-[#8E735B]">"will u dance with me?"</span>, or just softly whispering <span class="italic text-[#8E735B]">"stay on call na .."</span> late into the night—every single moment with you is precious to me.
+            </p>
+            
+            <p class="fade-in-up delay-400">
+                May this year bring you all the success, joy, and wonderful "gappe" your heart desires. You deserve the absolute best, today and always.
+            </p>
+            
+            <div class="pt-8 pb-4 fade-in-up delay-500">
+                <p class="mb-1">Yours truly,</p>
+                <p class="font-cursive text-5xl text-[#8E735B] ml-4">Dheeraj</p>
+            </div>
+            
+            <div class="border-t border-[#E5D5C1] pt-6 mt-6 fade-in-up delay-600 flex justify-between items-end">
+                <p class="text-sm italic text-[#A48F7A] tracking-wider uppercase font-light">
+                    Est. 1980s Aesthetic
+                </p>
+                <p class="font-serif text-sm md:text-base text-[#8E735B] italic font-semibold">
+                    P.S. Don't miss me.
+                </p>
+            </div>
+            
+        </div>
+    </main>
+
+    <script>
+        const audio = document.getElementById('bg-music');
+        const playIcon = document.getElementById('play-icon');
+        const pauseIcon = document.getElementById('pause-icon');
+        let isPlaying = false;
+
+        function toggleMusic() {
+            if (isPlaying) {
+                audio.pause();
+                playIcon.classList.remove('hidden');
+                pauseIcon.classList.add('hidden');
+            } else {
+                // Play audio and handle browser autoplay policies
+                let playPromise = audio.play();
+                if (playPromise !== undefined) {
+                    playPromise.then(_ => {
+                        playIcon.classList.add('hidden');
+                        pauseIcon.classList.remove('hidden');
+                    })
+                    .catch(error => {
+                        console.log("Audio playback was prevented by browser:", error);
+                        // Optional: Show a subtle message to the user
+                    });
+                }
+            }
+            isPlaying = !isPlaying;
+        }
+    </script>
+</body>
+</html>
+    <script>
+        const btn = document.getElementById('run');
+        let hovers = 0;
+        
+        btn.onmouseover = () => { 
+            if(window.innerWidth > 600 && hovers < 3) { 
+                btn.style.transform = `translate(${Math.random()*150-75}px, ${Math.random()*150-75}px)`; 
+                hovers++; 
+            } 
+        };
+        
+        btn.onclick = () => { 
+            // 1. Kill the Chaos
+            document.getElementById('roast').style.display = 'none'; 
+            document.body.style.animation = 'none'; 
+            document.body.style.background = '#f5ece3'; // Soft cream background
+            
+            document.getElementById('chaotic-bgm').pause();
+            document.getElementById('final-bgm').play();
+
+            // 2. Reveal the Beauty
+            const sweetDiv = document.getElementById('sweet-ending');
+            sweetDiv.style.display = 'flex'; 
+            setTimeout(() => { sweetDiv.style.opacity = '1'; }, 50);
+            
+            const slideshow = document.getElementById('slideshow');
+            slideshow.style.opacity = '0.15';
+            startSlideshow();
+            spawnBalloons();
+        };
+
+        const pics = ['couple1.jpg', 'couple2.jpg', 'couple3.jpg', 'couple4.jpg', 'couple5.jpg', 'couple6.jpg', 'couple7.jpg'];
+        let slideIndex = 0;
+        function startSlideshow() {
+            const bgElement = document.getElementById('slideshow');
+            bgElement.style.backgroundImage = `url('${pics[slideIndex]}')`;
+            setInterval(() => {
+                slideIndex = (slideIndex + 1) % pics.length;
+                bgElement.style.backgroundImage = `url('${pics[slideIndex]}')`;
+            }, 3500);
+        }
+
+        const balloons = ['🎈', '✨', '🐿️', '🤍', '🤗', '💗' , ];
+        function spawnBalloons() {
+            setInterval(() => {
+                let b = document.createElement('div');
+                b.className = 'balloon';
+                b.innerText = balloons[Math.floor(Math.random() * balloons.length)];
+                b.style.left = Math.random() * 90 + 'vw';
+                let duration = Math.random() * 8 + 12; 
+                b.style.animationDuration = duration + 's';
+                document.body.appendChild(b);
+                setTimeout(() => b.remove(), duration * 1000); 
+            }, 1000); 
+        }
+    </script>
+</body>
+</html>
